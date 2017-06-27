@@ -1,0 +1,9 @@
+{
+	"name": "prometheus-d",
+	"description": "A prometheus client for D",
+	"copyright": "Copyright © 2017, Mario Silva",
+	"authors": [ "Mário Silva" ],
+	"license": "MIT License",
+	"targetType": "library",
+	"targetName": "prometheus-d",
+}
