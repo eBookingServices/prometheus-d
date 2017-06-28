@@ -10,13 +10,6 @@ public class IllegalArgumentException : Exception {
 }
 
 mixin template BasicCollectorClassConstructor(T) {
-	string _namespace;
-	string _subsystem;
-	string _name;
-	string _fullname;
-	string _help;
-	string[] _labelNames;
-
 	T name(string name) {
 		this._name = name;
 		return this;
@@ -37,13 +30,27 @@ mixin template BasicCollectorClassConstructor(T) {
 		return this;
 	}
 
-	T labelNames(string[] labelNames) {
-		this._labelNames = labelNames;
+	T labelNames(string[string] labels) {
+		this._labels = labels;
 		return this;
 	}
 
 	T create() {
 		return new T();
+	}
+}
+
+mixin template getSimpleTextExpositionTemplate() {
+	override public string getTextExposition() {
+		import prometheus.exposition.text;
+		import std.format;
+		import std.array;
+		string[] text;
+		text ~= HELP_LINE.format(_name, escape(_help));
+		text ~= TYPE_LINE.format(_name, getType());
+		text ~= METRIC_LINE.format(_name, getLabelsTextExposition(), value);
+
+		return text.join(DELIMITER);
 	}
 }
 
@@ -76,8 +83,8 @@ public static string sanitizeMetricName(string metricName) {
 /**
 * Sanitize label names
 */
-public static checkLabelNames(string[] labels) {
-	foreach(label; labels)
+public static checkLabelNames(string[string] labels) {
+	foreach(label, value; labels)
 		checkMetricLabelName(label);
 }
 

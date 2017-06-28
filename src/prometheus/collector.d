@@ -3,23 +3,49 @@ module prometheus.collector;
 import prometheus.common;
 
 public class Collector {
-	public string name;
-	public string help;
-	public string[] labels;
-	//public Sample[] samples;
+	string _namespace;
+	string _subsystem;
+	string _name;
+	string _fullname;
+	string _help;
+	string[string] _labels;
 
 	//public abstract Collector collect();
-	public abstract string[] namesToRegister();
+	public abstract string getTextExposition();
+	public abstract string getType();
+
+	public string getName() {
+		return _name;
+	}
 
 	this() {}
 
-	this(string name, string help, string[] labels) {
+	this(string name, string help, string[string] labels) {
 		checkMetricName(name);
 		checkHelp(help);
 		checkLabelNames(labels);
-		this.name = name;
-		this.help = help;
-		this.labels = labels;
+		this._name = name;
+		this._help = help;
+		this._labels = labels;
+	}
+
+	string getLabelsTextExposition() {
+		return getLabelsTextExposition(_labels);
+	}
+
+	static string getLabelsTextExposition(string[string] labels) {
+		import prometheus.exposition.text;
+		import std.array;
+		import std.format;
+		if (!labels.length)
+			return "";
+
+		string[] labelText;
+		foreach (name, value; labels) {
+			labelText ~= LABEL.format(name, value);
+		}
+
+		return "{" ~ labelText.join(SEPARATOR) ~ "}";
 	}
 
 	// public class Sample {

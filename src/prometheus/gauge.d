@@ -6,19 +6,20 @@ import prometheus.common;
 
 
 public class Gauge : Collector {
-	private double counterValue;
+	private double value;
 
 	this() {
-		counterValue = 0;
+		value = 0;
 	}
-	this(string name, string help, string[] labels) {
-		counterValue = 0;
+	this(string name, string help, string[string] labels) {
+		value = 0;
 		super(name, help, labels);
 	}
 	mixin BasicCollectorClassConstructor!Gauge;
+	mixin getSimpleTextExpositionTemplate;
 
 	public double get() {
-		return counterValue;
+		return value;
 	}
 
 	public void setToCurrentTime() {
@@ -32,7 +33,7 @@ public class Gauge : Collector {
 
 	public void inc(double amt) {
 		synchronized {
-			counterValue += amt;
+			value += amt;
 		}
 	}
 
@@ -46,12 +47,12 @@ public class Gauge : Collector {
 
 	public void set(double amt) {
 		synchronized {
-			counterValue = amt;
+			value = amt;
 		}
 	}
 
-	override public string[] namesToRegister() {
-		return [];
+	override public string getType() {
+		return "gauge";
 	}
 }
 
@@ -76,4 +77,10 @@ unittest {
 	import std.datetime;
 	gauge.setToCurrentTime();
 	assert(gauge.get() == Clock.currTime().toUnixTime(), "Not equal to current unix timestamp");
+
+	gauge.set(4.5);
+
+	assert(gauge.getTextExposition() == "# HELP test Help
+# TYPE test gauge
+test 4.5", "Text exposition doesn't look good dude");
 }
