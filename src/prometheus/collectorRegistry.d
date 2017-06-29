@@ -17,9 +17,13 @@ public class CollectorRegistry {
 		//this(false);
 	}
 
-	// public this(bool autoDescribe) {
-	// 	this.autoDescribe = autoDescribe;
-	// }
+	Collector getCollectorByName(string collectorName) {
+		if (auto collector = collectorName in nameToCollector)
+			return *collector;
+
+		return null;
+	}
+
 
 	public auto getAllCollectors() {
 		return nameToCollector.values;
