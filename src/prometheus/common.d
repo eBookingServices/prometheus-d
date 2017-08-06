@@ -30,9 +30,28 @@ mixin template BasicCollectorClassConstructor(T) {
 		return this;
 	}
 
-	T labelNames(string[string] labels) {
-		this._labels = labels;
+	T labelNames(string[] labelNames) {
+		checkLabelNames(labelNames);
+		this._labelNames = labelNames;
+		this.noLabelsChild = null;
 		return this;
+	}
+
+	public Child labels(in string[] labelValues) {
+		if (_labelNames.length != labelValues.length)
+			throw new IllegalArgumentException("You need to provide a value to all labels");
+
+		foreach (labelValue; labelValues) {
+			if (!labelValue.length)
+				throw new IllegalArgumentException("Label cannot be null.");
+		}
+
+		if (auto ziChild = labelValues in children)
+			return cast(T.Child)*ziChild;
+
+		auto newChild = new T.Child();
+		children[labelValues] = cast(Child)newChild;
+		return newChild;
 	}
 
 	T create() {
@@ -40,7 +59,7 @@ mixin template BasicCollectorClassConstructor(T) {
 	}
 }
 
-mixin template getSimpleTextExpositionTemplate() {
+mixin template getSimpleTextExpositionTemplate(T) {
 	override public string getTextExposition() {
 		import prometheus.exposition.text;
 		import std.format;
@@ -48,7 +67,17 @@ mixin template getSimpleTextExpositionTemplate() {
 		string[] text;
 		text ~= HELP_LINE.format(_name, escape(_help));
 		text ~= TYPE_LINE.format(_name, getType());
-		text ~= METRIC_LINE.format(_name, getLabelsTextExposition(), value);
+
+		if (!children.length) {
+			auto child = cast(T.Child)noLabelsChild;
+			text ~= METRIC_LINE.format(_name, "", child.get());
+		}
+		else {
+			foreach (labelValues, ziChild; children) {
+				auto child = cast(T.Child)ziChild;
+				text ~= METRIC_LINE.format(_name, getLabelsTextExposition(_labelNames, labelValues), child.get());
+			}
+		}
 
 		return text.join(DELIMITER);
 	}
@@ -83,8 +112,8 @@ public static string sanitizeMetricName(string metricName) {
 /**
 * Sanitize label names
 */
-public static checkLabelNames(string[string] labels) {
-	foreach(label, value; labels)
+public static checkLabelNames(string[] labelNames) {
+	foreach(label; labelNames)
 		checkMetricLabelName(label);
 }
 
@@ -96,8 +125,8 @@ public static void checkMetricLabelName(string name) {
 	if (!name.match(METRIC_LABEL_NAME_RE))
 		throw new IllegalArgumentException("Invalid metric label name: " ~ name);
 
-	static auto RESERVED_METRIC_LABEL_NAME_RE = ctRegex!"__.*";
-	if (!name.match(RESERVED_METRIC_LABEL_NAME_RE))
+	static auto RESERVED_METRIC_LABEL_NAME_RE = ctRegex!"^__.*";
+	if (name.match(RESERVED_METRIC_LABEL_NAME_RE))
 		throw new IllegalArgumentException("Invalid metric label name, reserved for internal use: " ~ name);
 }
 

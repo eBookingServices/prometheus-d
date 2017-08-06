@@ -8,7 +8,13 @@ public class Collector {
 	string _name;
 	string _fullname;
 	string _help;
-	string[string] _labels;
+
+	string[] _labelNames;
+
+	public abstract class Child {}
+
+	protected Child[string[]] children;
+	protected Child noLabelsChild;
 
 	//public abstract Collector collect();
 	public abstract string getTextExposition();
@@ -20,48 +26,27 @@ public class Collector {
 
 	this() {}
 
-	this(string name, string help, string[string] labels) {
+	this(string name, string help, string[] labelNames) {
 		checkMetricName(name);
 		checkHelp(help);
-		checkLabelNames(labels);
+		checkLabelNames(labelNames);
 		this._name = name;
 		this._help = help;
-		this._labels = labels;
+		this._labelNames = labelNames;
 	}
 
-	string getLabelsTextExposition() {
-		return getLabelsTextExposition(_labels);
-	}
-
-	static string getLabelsTextExposition(string[string] labels) {
+	static string getLabelsTextExposition(in string[] labelNames, in string[] labelValues) {
 		import prometheus.exposition.text;
 		import std.array;
 		import std.format;
-		if (!labels.length)
+		if (!labelNames.length)
 			return "";
 
 		string[] labelText;
-		foreach (name, value; labels) {
-			labelText ~= LABEL.format(name, value);
+		foreach (i, labelName; labelNames) {
+			labelText ~= LABEL.format(labelName, labelValues[i]);
 		}
 
 		return "{" ~ labelText.join(SEPARATOR) ~ "}";
 	}
-
-	// public class Sample {
-	// 	public string name;
-	// 	public string[] labelNames;
-	// 	public string[] labelValues;
-	// 	public double value;
-	//
-	// 	this(string name, string[] labelNames, string[] labelValues, double value) {
-	// 		checkLabelNames(labelNames);
-	// 		if (labelNames.length != labelValues.length)
-	// 			throw new IllegalArgumentException("labelNames and labelValues need to have the same length");
-	// 		this.name = name;
-	// 		this.labelNames = labelNames;
-	// 		this.labelValues = labelValues;
-	// 		this.value = value;
-	// 	}
-	// }
 }

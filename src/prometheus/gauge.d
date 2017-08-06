@@ -6,48 +6,90 @@ import prometheus.common;
 
 
 public class Gauge : Collector {
-	private double value;
-
 	this() {
-		value = 0;
+		noLabelsChild = new Gauge.Child();
 	}
-	this(string name, string help, string[string] labels) {
-		value = 0;
+	this(string name, string help, string[] labels) {
+		if (!labels.length)
+			noLabelsChild = new Gauge.Child();
 		super(name, help, labels);
 	}
 	mixin BasicCollectorClassConstructor!Gauge;
-	mixin getSimpleTextExpositionTemplate;
+	mixin getSimpleTextExpositionTemplate!Gauge;
 
 	public double get() {
-		return value;
-	}
-
-	public void setToCurrentTime() {
-		import std.datetime;
-		return set(Clock.currTime().toUnixTime());
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.get();
 	}
 
 	public void inc() {
-		return inc(1);
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.inc();
 	}
 
 	public void inc(double amt) {
-		synchronized {
-			value += amt;
-		}
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.inc(amt);
 	}
 
-	public void dec() {
-		return inc(-1);
+	public void setToCurrentTime() {
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.setToCurrentTime();
 	}
 
 	public void dec(double amt) {
-		return inc(-amt);
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.dec(amt);
+	}
+
+	public void dec() {
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.dec();
 	}
 
 	public void set(double amt) {
-		synchronized {
-			value = amt;
+		auto child = cast(Gauge.Child)(noLabelsChild);
+		return child.set(amt);
+	}
+
+	class Child : Collector.Child {
+		private double value;
+
+		this() {
+			value = 0;
+		}
+
+		public double get() {
+			return value;
+		}
+
+		public void setToCurrentTime() {
+			import std.datetime;
+			return set(Clock.currTime().toUnixTime());
+		}
+
+		public void inc() {
+			return inc(1);
+		}
+
+		public void inc(double amt) {
+			synchronized {
+				value += amt;
+			}
+		}
+
+		public void dec() {
+			return inc(-1);
+		}
+
+		public void dec(double amt) {
+			return inc(-amt);
+		}
+
+		public void set(double amt) {
+			synchronized {
+				value = amt;
+			}
 		}
 	}
 
