@@ -106,8 +106,8 @@ public class Histogram : Collector {
 				auto child = cast(Histogram.Child)(ziChild);
 				text ~= getChildRepresentation(child, labelValues);
 
-				text ~= METRIC_LINE.format(_name ~ "_sum", labelValues, child._sum);
-				text ~= METRIC_LINE.format(_name ~ "_count", labelValues, child._count);
+				text ~= METRIC_LINE.format(_name ~ "_sum", getLabelsTextExposition(_labelNames, labelValues), child._sum);
+				text ~= METRIC_LINE.format(_name ~ "_count", getLabelsTextExposition(_labelNames, labelValues), child._count);
 			}
 		}
 
@@ -242,12 +242,12 @@ jamla_bucket{code=\"ah\",le=\"10\"} 1
 jamla_bucket{code=\"ah\",le=\"20\"} 2
 jamla_bucket{code=\"ah\",le=\"30\"} 2
 jamla_bucket{code=\"ah\",le=\"+Inf\"} 2
-jamla_sum[\"ah\"] 15.2
-jamla_count[\"ah\"] 2
+jamla_sum{code=\"ah\"} 15.2
+jamla_count{code=\"ah\"} 2
 jamla_bucket{code=\"some_other_value\",le=\"10\"} 1
 jamla_bucket{code=\"some_other_value\",le=\"20\"} 1
 jamla_bucket{code=\"some_other_value\",le=\"30\"} 1
 jamla_bucket{code=\"some_other_value\",le=\"+Inf\"} 1
-jamla_sum[\"some_other_value\"] 1.8
-jamla_count[\"some_other_value\"] 1", "Histogram expsition is not bery nice");
+jamla_sum{code=\"some_other_value\"} 1.8
+jamla_count{code=\"some_other_value\"} 1", "Histogram expsition is not bery nice");
 }
