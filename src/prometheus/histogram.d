@@ -10,8 +10,7 @@ public class Histogram : Collector {
 		noLabelsChild = new Histogram.Child();
 	}
 	this(string name, string help, string[] labels) {
-		if (!labels.length)
-			noLabelsChild = new Histogram.Child();
+		noLabelsChild = new Histogram.Child();
 		super(name, help, labels);
 	}
 	mixin BasicCollectorClassConstructor!Histogram;
@@ -25,10 +24,8 @@ public class Histogram : Collector {
 			throw new IllegalArgumentException("The buckets array needs to be sorted");
 
 		_upperBounds = buckets;
-		if (!_labelNames.length) {
-			auto child = cast(Histogram.Child)(noLabelsChild);
-			child.initializeBucketCounters();
-		}
+		auto child = cast(Histogram.Child)(noLabelsChild);
+		child.initializeBucketCounters();
 
 		return this;
 	}
@@ -97,7 +94,7 @@ public class Histogram : Collector {
 		text ~= HELP_LINE.format(_name, escape(_help));
 		text ~= TYPE_LINE.format(_name, getType());
 
-		if (!_labelNames.length) {
+		if (!children.keys.length) {
 			auto child = cast(Histogram.Child)(noLabelsChild);
 			text ~= getChildRepresentation(child);
 
@@ -122,17 +119,20 @@ public class Histogram : Collector {
 		import std.conv;
 		import std.format;
 
+		// when the histogram has not observed anything yet, there will be no labelValues
+		auto labelNamesToUse = ziLabelValues.length ? _labelNames : [];
+
 		enum BUCKET = "%s_bucket";
 		string[] text;
 		foreach (i, value; this._upperBounds) {
-			auto labelNames = _labelNames.dup;
+			auto labelNames = labelNamesToUse.dup;
 			labelNames ~= "le";
 			auto labelValues = ziLabelValues.dup;
 			labelValues ~= value.to!string;
 			text ~= METRIC_LINE.format(BUCKET.format(_name), getLabelsTextExposition(labelNames, labelValues), child._bucketCounters[i]);
 		}
 
-		text ~= METRIC_LINE.format(BUCKET.format(_name), getLabelsTextExposition(_labelNames.dup ~ "le", ziLabelValues.dup ~ "+Inf"), child._count);
+		text ~= METRIC_LINE.format(BUCKET.format(_name), getLabelsTextExposition(labelNamesToUse.dup ~ "le", ziLabelValues.dup ~ "+Inf"), child._count);
 
 		return text;
 	}
