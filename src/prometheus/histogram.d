@@ -94,14 +94,15 @@ public class Histogram : Collector {
 		text ~= HELP_LINE.format(_name, escape(_help));
 		text ~= TYPE_LINE.format(_name, getType());
 
-		if (!children.keys.length) {
+
+		if (!_labelNames.length) {
 			auto child = cast(Histogram.Child)(noLabelsChild);
 			text ~= getChildRepresentation(child);
 
 			text ~= METRIC_LINE.format(_name ~ "_sum", "", child._sum);
 			text ~= METRIC_LINE.format(_name ~ "_count", "", child._count);
 		}
-		else {
+		else if (children.length) {
 			foreach (labelValues, ziChild; children) {
 				auto child = cast(Histogram.Child)(ziChild);
 				text ~= getChildRepresentation(child, labelValues);

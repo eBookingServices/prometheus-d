@@ -68,11 +68,11 @@ mixin template getSimpleTextExpositionTemplate(T) {
 		text ~= HELP_LINE.format(_name, escape(_help));
 		text ~= TYPE_LINE.format(_name, getType());
 
-		if (!children.length) {
+		if (!_labelNames.length) {
 			auto child = cast(T.Child)noLabelsChild;
 			text ~= METRIC_LINE.format(_name, "", child.get());
 		}
-		else {
+		else if (children.length) {
 			foreach (labelValues, ziChild; children) {
 				auto child = cast(T.Child)ziChild;
 				text ~= METRIC_LINE.format(_name, getLabelsTextExposition(_labelNames, labelValues), child.get());
