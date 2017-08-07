@@ -33,7 +33,7 @@ mixin template BasicCollectorClassConstructor(T) {
 	T labelNames(string[] labelNames) {
 		checkLabelNames(labelNames);
 		this._labelNames = labelNames;
-		this.noLabelsChild = null;
+		//this.noLabelsChild = null;
 		return this;
 	}
 

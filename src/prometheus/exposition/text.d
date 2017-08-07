@@ -50,12 +50,22 @@ unittest {
 	auto counter = new Counter().name("ziCounter").help("Help");
 	CollectorRegistry.defaultRegistry.register(counter);
 
-	counter.inc();
-	counter.inc();
-	counter.inc();
-
 	auto counter2 = new Counter().name("ziCounter2").help("Help").labelNames(["http_code", "some_other_shit"]);
 	CollectorRegistry.defaultRegistry.register(counter2);
+
+	writeln("Gonna test with empty %s".format(CollectorRegistry.defaultRegistry.generateExpositionText()));
+	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == q{# HELP ziCounter Help
+# TYPE ziCounter counter
+ziCounter 0
+# HELP ziCounter2 Help
+# TYPE ziCounter2 counter
+ziCounter2 0
+
+}, "Not bery nice text exposition when empty");
+
+	counter.inc();
+	counter.inc();
+	counter.inc();
 
 	counter2.labels(["1", "2"]).inc();
 	counter2.labels(["1", "2"]).inc();
@@ -65,11 +75,11 @@ unittest {
 	auto gauge = new Gauge().name("ziGauge").help("Help");
 	CollectorRegistry.defaultRegistry.register(gauge);
 
-	gauge.inc();
-	gauge.inc();
-
 	auto gauge2 = new Gauge().name("ziGauge2").help("Help").labelNames(["ramala", "jamala"]);
 	CollectorRegistry.defaultRegistry.register(gauge2);
+
+	gauge.inc();
+	gauge.inc();
 
 	gauge2.labels(["super", "awesome"]).inc();
 	gauge2.labels(["super", "awesome"]).inc();
