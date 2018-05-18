@@ -54,14 +54,14 @@ unittest {
 	CollectorRegistry.defaultRegistry.register(counter2);
 
 	writeln("Gonna test with empty %s".format(CollectorRegistry.defaultRegistry.generateExpositionText()));
-	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == q{# HELP ziCounter Help
+	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == `# HELP ziCounter Help
 # TYPE ziCounter counter
 ziCounter 0
 # HELP ziCounter2 Help
 # TYPE ziCounter2 counter
 ziCounter2 0
 
-}, "Not bery nice text exposition when empty");
+`, "Not bery nice text exposition when empty");
 
 	counter.inc();
 	counter.inc();
@@ -88,7 +88,7 @@ ziCounter2 0
 	auto histogram = new Histogram().name("ziHist").help("Help").buckets(Histogram.DEFAULT_BUCKETS);
 	CollectorRegistry.defaultRegistry.register(histogram);
 
-	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == q{# HELP ziGauge Help
+	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == `# HELP ziGauge Help
 # TYPE ziGauge gauge
 ziGauge 2
 # HELP ziCounter Help
@@ -121,12 +121,12 @@ ziHist_count 0
 # TYPE ziGauge2 gauge
 ziGauge2{ramala="super",jamala="awesome"} 3
 
-}, "Not bery nice text exposition");
+`, "Not bery nice text exposition");
 
 	histogram.observe(3);
 
 	//writeln("%s".format(CollectorRegistry.defaultRegistry.generateExpositionText()));
-	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == q{# HELP ziGauge Help
+	assert(CollectorRegistry.defaultRegistry.generateExpositionText() == `# HELP ziGauge Help
 # TYPE ziGauge gauge
 ziGauge 2
 # HELP ziCounter Help
@@ -159,5 +159,5 @@ ziHist_count 1
 # TYPE ziGauge2 gauge
 ziGauge2{ramala="super",jamala="awesome"} 3
 
-}, "Not bery nice text exposition");
+`, "Not bery nice text exposition");
 }
